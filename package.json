@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "build": "webpack --config webpack/prod.js ",
-    "start": "webpack-dev-server --config webpack/base.js --open"
+    "start": "webpack-dev-server --config webpack/base.js --open",
+    "deploy": "yarn build && git subtree push --prefix dist origin gh-pages"
   },
   "author": "Yicheng Gong",
   "license": "MIT",
