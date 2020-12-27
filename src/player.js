@@ -57,30 +57,41 @@ export default class Player {
         callback: () => (this.canJump = true)
       });
       this.sprite.setVelocityY(-12);
-      this.sprite.anims.play('jumping', true);
       this.canJump = false;
-    }
+      this.sprite.anims.play('jumping', true);
+      console.log('jumping');
+    } 
 
     if (this.leftInput.isDown && !this.isTouching.left) {
       this.sprite.setFlipX(false);
       if (!this.isTouchingLeft) {
         this.sprite.applyForce({ x: -moveSpeed, y: 0});
-        // console.log(this.sprite.body.velocity.x);
       }
-      this.sprite.anims.play('walking', true);
+      if (this.isTouching.ground && this.canJump) {
+        this.sprite.anims.play('walking', true);
+      }
+      // console.log(this.sprite.body.velocity.x);
     } else if (this.rightInput.isDown && !this.isTouching.right) {
       this.sprite.setFlipX(true);
+
       if (!this.isTouching.right) {
-        this.sprite.applyForce({ x: moveSpeed, y: 0})
-        // console.log(this.sprite.body.velocity.x);
+        this.sprite.applyForce({ x: moveSpeed, y: 0});
       }
-      this.sprite.anims.play('walking', true);
-    } else if (this.isTouching.ground) {
+
+      if (this.isTouching.ground && this.canJump) {
+        this.sprite.anims.play('walking', true);
+      }
+        // console.log(this.sprite.body.velocity.x);
+    } else if (this.isTouching.ground && this.canJump) {
+      console.log('standing');
       this.sprite.anims.play('standing', true);
     }
 
-    if (this.sprite.body.velocity.x > 5) this.sprite.setVelocityX(5);
-    else if (this.sprite.body.velocity.x < -5) this.sprite.setVelocityX(-5);
+    if (this.sprite.body.velocity.x > 5) {
+      this.sprite.setVelocityX(5);
+    } else if (this.sprite.body.velocity.x < -5) {
+      this.sprite.setVelocityX(-5);
+    }
   }
 
   _setupPlayerSprite(positionX, positionY) {
