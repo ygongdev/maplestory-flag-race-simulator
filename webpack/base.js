@@ -32,7 +32,9 @@ module.exports = {
     new webpack.DefinePlugin({
       CANVAS_RENDERER: JSON.stringify(true),
       WEBGL_RENDERER: JSON.stringify(true),
-      "process.env.DEBUG": true,
+    }),
+    new webpack.EnvironmentPlugin({
+      DEBUG: process.env.NODE_ENV === "development"
     }),
     new HtmlWebpackPlugin({
       template: "./index.html"

@@ -89,7 +89,7 @@ export default class Player {
     const { Body, Bodies } = Phaser.Physics.Matter.Matter; // Native Matter modules
 
     const { width: w, height: h } = this.sprite;
-    const mainBody = Bodies.rectangle(w / 2, h / 2, w*0.6, h, { chamfer: { radius: 10 } });
+    const mainBody = Bodies.rectangle(w / 2, h / 2, w*0.6, h*0.95, { chamfer: { radius: 10 } });
     this.sensors = {
       bottom: Bodies.rectangle(w / 2, h, w/2, 2, { isSensor: true }),
       left: Bodies.rectangle(w* 0.18, h / 2, 2, h * 0.5, { isSensor: true }),

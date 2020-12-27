@@ -13,11 +13,6 @@ module.exports = merge(base, {
     maxEntrypointSize: 900000,
     maxAssetSize: 900000
   },
-  plugins: [
-    new webpack.DefinePlugin({
-      "process.env.DEBUG": false,
-    }),
-  ],
   optimization: {
     minimizer: [
       new TerserPlugin({

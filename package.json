@@ -4,8 +4,8 @@
   "description": "Maplestory flag race simulator",
   "main": "src/index.js",
   "scripts": {
-    "build": "webpack --config webpack/prod.js ",
-    "start": "webpack-dev-server --config webpack/base.js --open",
+    "build": "cross-env NODE_ENV=production webpack --config webpack/prod.js ",
+    "start": "cross-env NODE_ENV=development webpack-dev-server --config webpack/base.js --open",
     "deploy": "yarn build && git subtree push --prefix dist origin gh-pages"
   },
   "author": "Yicheng Gong",
@@ -17,6 +17,7 @@
     "@babel/preset-env": "^7.7.1",
     "babel-loader": "^8.0.6",
     "clean-webpack-plugin": "^3.0.0",
+    "cross-env": "^7.0.3",
     "file-loader": "^4.2.0",
     "html-webpack-plugin": "^3.2.0",
     "raw-loader": "^3.1.0",
