@@ -3,13 +3,24 @@
 import SnowTileset from './assets/tileset/flag_texture_75_86.png';
 import SlopeLeftTileset from './assets/tileset/slope_texture_75_86.png';
 import SlopeRightTileset from './assets/tileset/slope_texture_75_86_right.png';
+import PortalImage from './assets/images/portal.png';
 import PlayerWalkingSpriteSheet from './assets/spritesheet/walking.png';
 import PlayerClimbingSpriteSheet from './assets/spritesheet/climbing.png';
 import PlayerJumpingSpriteSheet from './assets/spritesheet/jumping.png';
 import PlayerStandingSpriteSheet from './assets/spritesheet/standing.png';
 import FlagRaceTilemap from './assets/tilemap/map.json';
+import FlagRaceMusic from './assets/audio/captureTheFlag.mp3';
 
 import Player from './player';
+import Music from './music';
+import Map from './map';
+
+import {
+  TILEMAP_KEYS,
+  IMAGE_KEYS,
+  SPRITESHEET_KEYS,
+  SOUND_KEYS
+} from './utils/constants';
 
 export default class MaplestoryFlagRaceSimulator extends Phaser.Scene {
   player;
@@ -18,42 +29,56 @@ export default class MaplestoryFlagRaceSimulator extends Phaser.Scene {
   slopeLayer;
   snowLayer;
   map;
+  music;
 
   constructor() {
     super();
   }
 
   preload () {
-    this.load.image('snowTiles', SnowTileset);
-    this.load.image('slopeLeftTiles', SlopeLeftTileset);
-    this.load.image('slopeRightTiles', SlopeRightTileset);
-    this.load.spritesheet('player_standing', PlayerStandingSpriteSheet, { frameWidth: 75.5, frameHeight: 86, });
-    this.load.spritesheet('player_walking', PlayerWalkingSpriteSheet, { frameWidth: 75.5, frameHeight: 86 });
-    this.load.spritesheet('player_jumping', PlayerJumpingSpriteSheet, { frameWidth: 76, frameHeight: 82 });
-    this.load.spritesheet('player_climbing', PlayerClimbingSpriteSheet, { frameWidth: 62, frameHeight: 86 });
-    this.load.tilemapTiledJSON('map', FlagRaceTilemap);
+    this.load.image(IMAGE_KEYS.SNOW, SnowTileset);
+    this.load.image(IMAGE_KEYS.SLOPE_LEFT, SlopeLeftTileset);
+    this.load.image(IMAGE_KEYS.SLOPE_RIGHT, SlopeRightTileset);
+    this.load.image(IMAGE_KEYS.PORTAL, PortalImage);
+    this.load.spritesheet(SPRITESHEET_KEYS.PLAYER.STANDING, PlayerStandingSpriteSheet, { frameWidth: 75.5, frameHeight: 86, });
+    this.load.spritesheet(SPRITESHEET_KEYS.PLAYER.WALKING, PlayerWalkingSpriteSheet, { frameWidth: 75.5, frameHeight: 86 });
+    this.load.spritesheet(SPRITESHEET_KEYS.PLAYER.JUMPING, PlayerJumpingSpriteSheet, { frameWidth: 76, frameHeight: 82 });
+    this.load.spritesheet(SPRITESHEET_KEYS.PLAYER.CLIMBING, PlayerClimbingSpriteSheet, { frameWidth: 62, frameHeight: 86 });
+    this.load.tilemapTiledJSON(TILEMAP_KEYS.FLAG_RACE, FlagRaceTilemap);
+    this.load.audio(SOUND_KEYS.FLAG_RACE, FlagRaceMusic);
   }
 
   create () {
-    this.map = this.add.tilemap('map');
-    const snowTileset = this.map.addTilesetImage('snow', 'snowTiles', 75, 86, 0, 0);
-    const slopeLeftTileset = this.map.addTilesetImage('slope_left', 'slopeLeftTiles', 75, 86, 0, 0);
-    const slopeRightTileset = this.map.addTilesetImage('slope_right', 'slopeRightTiles', 75, 86, 0, 0);
+    this.music = new Music(this);
+    this.music.audio.play()
 
-    this.slopeLayer = this.map.createLayer('SlopeLayer', [slopeLeftTileset, slopeRightTileset], 0, 0);
-    this.snowLayer = this.map.createLayer('SnowLayer', snowTileset, 0, 0);
-    this.passPlatformLayer = this.map.createLayer('PassPlatformLayer', snowTileset, 0, 0);
+    this.map = new Map(this);
 
-    this.snowLayer.setCollisionBetween(0, this.snowLayer.tilesTotal, true);
-    this.slopeLayer.setCollisionBetween(0, this.slopeLayer.tilesTotal, true);
+    const spawnPoint = this.map.tilemap.findObject("Player", obj => obj.name === "Spawn point");
+    const portal1 = this.map.tilemap.findObject("Portal", obj => obj.name === "portal1")
 
-    this.matter.world.convertTilemapLayer(this.slopeLayer);
-    this.matter.world.convertTilemapLayer(this.snowLayer);
+    this.portal1 = this.matter.add.sprite(0, 0, 'portal', 0);
+    this.portal1
+      .setFixedRotation()
+      .setStatic(true)
+      .setSensor(true)
+      .setPosition(portal1.x, portal1.y - this.portal1.height / 2);
+  
+    this.player = new Player(this, spawnPoint.x, spawnPoint.y);
 
-    this.player = new Player(this, 5000, this.map.heightInPixels - 1000);
+    this.matterCollision.addOnCollideActive({
+      objectA: [ this.portal1],
+      objectB: [ this.player.sensors.right ],
+      callback: () => {
+        if (this.player.upInput.isDown) {
+          this.player.sprite.setVelocity(0);
+          this.player.sprite.setPosition(this.player.sprite.x + 400, this.player.sprite.y);
+        }
+      }
+    });
 
-    this.passPlatformLayer.setCollisionBetween(0, this.passPlatformLayer.tilesTotal, true);
-    const tiles = this.passPlatformLayer.getTilesWithin(0, 0, this.passPlatformLayer.width, this.passPlatformLayer.height , { isColliding: true });
+    this.map.layers.passPlatform.setCollisionBetween(0, this.map.layers.passPlatform.tilesTotal, true);
+    const tiles = this.map.layers.passPlatform.getTilesWithin(0, 0, this.map.layers.passPlatform.width, this.map.layers.passPlatform.height , { isColliding: true });
 
     const { TileBody: MatterTileBody } = Phaser.Physics.Matter;
 
@@ -80,9 +105,8 @@ export default class MaplestoryFlagRaceSimulator extends Phaser.Scene {
       });
     }
 
-    this.matter.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
-    this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
-
+    this.matter.world.setBounds(0, 0, this.map.tilemap.widthInPixels, this.map.tilemap.heightInPixels);
+    this.cameras.main.setBounds(0, 0, this.map.tilemap.widthInPixels, this.map.tilemap.heightInPixels);
 
     this.cameras.main.startFollow(this.player.sprite);
   }

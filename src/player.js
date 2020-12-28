@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import MultiKey from './multi-key';
+import MultiKey from './utils/multi-key';
 
 export default class Player {
   scene;
