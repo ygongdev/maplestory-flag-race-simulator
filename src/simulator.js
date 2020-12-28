@@ -7,7 +7,7 @@ import PlayerWalkingSpriteSheet from './assets/spritesheet/walking.png';
 import PlayerClimbingSpriteSheet from './assets/spritesheet/climbing.png';
 import PlayerJumpingSpriteSheet from './assets/spritesheet/jumping.png';
 import PlayerStandingSpriteSheet from './assets/spritesheet/standing.png';
-import FlagRaceTilemap from './assets/tilemap/test_tilemap.json';
+import FlagRaceTilemap from './assets/tilemap/map.json';
 
 import Player from './player';
 
@@ -18,9 +18,6 @@ export default class MaplestoryFlagRaceSimulator extends Phaser.Scene {
   slopeLayer;
   snowLayer;
   map;
-  isJumping = false;
-  isClimbing = false;
-  isOnSlope = false;
 
   constructor() {
     super();
@@ -45,17 +42,48 @@ export default class MaplestoryFlagRaceSimulator extends Phaser.Scene {
 
     this.slopeLayer = this.map.createLayer('SlopeLayer', [slopeLeftTileset, slopeRightTileset], 0, 0);
     this.snowLayer = this.map.createLayer('SnowLayer', snowTileset, 0, 0);
+    this.passPlatformLayer = this.map.createLayer('PassPlatformLayer', snowTileset, 0, 0);
 
-    this.snowLayer.setCollisionBetween(0, 1000);
-    this.slopeLayer.setCollisionBetween(0, 1000);
+    this.snowLayer.setCollisionBetween(0, this.snowLayer.tilesTotal, true);
+    this.slopeLayer.setCollisionBetween(0, this.slopeLayer.tilesTotal, true);
 
     this.matter.world.convertTilemapLayer(this.slopeLayer);
     this.matter.world.convertTilemapLayer(this.snowLayer);
 
+    this.player = new Player(this, 5000, this.map.heightInPixels - 1000);
+
+    this.passPlatformLayer.setCollisionBetween(0, this.passPlatformLayer.tilesTotal, true);
+    const tiles = this.passPlatformLayer.getTilesWithin(0, 0, this.passPlatformLayer.width, this.passPlatformLayer.height , { isColliding: true });
+
+    const { TileBody: MatterTileBody } = Phaser.Physics.Matter;
+
+    const matterTiles = tiles.map(tile => new MatterTileBody(this.matter.world, tile));
+
+    for (let i = 0; i < matterTiles.length; i++) {
+      const tile = matterTiles[i];
+      tile.setSensor(true);
+
+      this.matterCollision.addOnCollideStart({
+        objectA: [tile.body],
+        objectB: [ this.player.sensors.bigBottom ],
+        callback: () => tile.setSensor(false)
+      });
+      this.matterCollision.addOnCollideActive({
+        objectA: [tile.body],
+        objectB: [ this.player.sensors.bigBottom ],
+        callback: () => tile.setSensor(false)
+      });
+      this.matterCollision.addOnCollideEnd({
+        objectA: [tile.body],
+        objectB: [ this.player.sensors.bottom ],
+        callback: () => tile.setSensor(true)
+      });
+    }
+
     this.matter.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
     this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 
-    this.player = new Player(this, 2000, this.map.heightInPixels - 300);
+
     this.cameras.main.startFollow(this.player.sprite);
   }
 

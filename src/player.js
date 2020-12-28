@@ -30,6 +30,7 @@ export default class Player {
 
     this.scene.matter.world.on("beforeupdate", this._resetTouching, this);
     this.scene.events.on("update", this.update, this);
+
     this.scene.matterCollision.addOnCollideStart({
       objectA: [this.sensors.bottom, this.sensors.left, this.sensors.right],
       callback: this._onSensorCollide,
@@ -43,7 +44,7 @@ export default class Player {
   }
 
   update() {
-    const moveSpeed = this.isTouching.ground ? 0.05 : 0.05;
+    const moveSpeed = this.isTouching.ground ? 0.05 : 0.01;
 
     if (this.isTouching.ground) {
       this.sprite.setIgnoreGravity(true);
@@ -59,7 +60,6 @@ export default class Player {
       this.sprite.setVelocityY(-12);
       this.canJump = false;
       this.sprite.anims.play('jumping', true);
-      console.log('jumping');
     } 
 
     if (this.leftInput.isDown && !this.isTouching.left) {
@@ -83,7 +83,6 @@ export default class Player {
       }
         // console.log(this.sprite.body.velocity.x);
     } else if (this.isTouching.ground && this.canJump) {
-      console.log('standing');
       this.sprite.anims.play('standing', true);
     }
 
@@ -101,16 +100,18 @@ export default class Player {
 
     const { width: w, height: h } = this.sprite;
     const mainBody = Bodies.rectangle(w / 2, h / 2, w*0.6, h*0.95, { chamfer: { radius: 10 } });
+    // BigBottom is purely for detecting platforms that are meant to pass through earlier
     this.sensors = {
-      bottom: Bodies.rectangle(w / 2, h, w/2, 2, { isSensor: true }),
+      bottom: Bodies.rectangle(w / 2, h, w*.5, 2, { isSensor: true }),
+      bigBottom: Bodies.rectangle(w / 2, h, w*.5, 10, { isSensor: true }),
       left: Bodies.rectangle(w* 0.18, h / 2, 2, h * 0.5, { isSensor: true }),
       right: Bodies.rectangle(w * 0.82, h /2, 2, h * 0.5, { isSensor: true })
     };
 
     const compoundBody = Body.create({
-      parts: [mainBody, this.sensors.bottom, this.sensors.left, this.sensors.right],
+      parts: [mainBody, this.sensors.bottom, this.sensors.left, this.sensors.right, this.sensors.bigBottom],
       frictionStatic: 0,
-      frictionAir: 0.02,
+      frictionAir: 0.01,
       friction: 0.005,
       restitution: 0,
       mass: 20,
@@ -178,7 +179,9 @@ export default class Player {
    * If bodyB is slope or ground, is touching ground.
    */
   _onSensorCollide({bodyA, bodyB, pair}) {
-    if (bodyB.isSensor) return; // We only care about collisions with physical objects
+    if (bodyB.isSensor) {
+      return;
+    } // We only care about collisions with physical objects
     if (bodyA === this.sensors.left) {
       this.isTouching.left = true;
     } else if (bodyA === this.sensors.right) {
