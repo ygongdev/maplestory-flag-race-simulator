@@ -14,6 +14,7 @@ import FlagRaceMusic from './assets/audio/captureTheFlag.mp3';
 import Player from './player';
 import Music from './music';
 import Map from './map';
+import Portal from './portal';
 
 import {
   TILEMAP_KEYS,
@@ -50,60 +51,21 @@ export default class MaplestoryFlagRaceSimulator extends Phaser.Scene {
 
   create () {
     this.music = new Music(this);
-    this.music.audio.play()
-
     this.map = new Map(this);
-
+    this.music.audio.play()
+    
     const spawnPoint = this.map.tilemap.findObject("Player", obj => obj.name === "Spawn point");
-    const portal1 = this.map.tilemap.findObject("Portal", obj => obj.name === "portal1")
-
-    this.portal1 = this.matter.add.sprite(0, 0, 'portal', 0);
-    this.portal1
-      .setFixedRotation()
-      .setStatic(true)
-      .setSensor(true)
-      .setPosition(portal1.x, portal1.y - this.portal1.height / 2);
-  
+    const portal1 = this.map.tilemap.findObject("Portal", obj => obj.name === "portal1");
+    
+    const portal = new Portal(this, portal1);
     this.player = new Player(this, spawnPoint.x, spawnPoint.y);
 
-    this.matterCollision.addOnCollideActive({
-      objectA: [ this.portal1],
-      objectB: [ this.player.sensors.right ],
-      callback: () => {
-        if (this.player.upInput.isDown) {
-          this.player.sprite.setVelocity(0);
-          this.player.sprite.setPosition(this.player.sprite.x + 400, this.player.sprite.y);
-        }
-      }
+    portal.onPlayerCollision(this.player, () => {
+      this.player.sprite.setVelocity(0);
+      this.player.sprite.setPosition(portal.sprite.x + 400, this.player.sprite.y);
     });
 
-    this.map.layers.passPlatform.setCollisionBetween(0, this.map.layers.passPlatform.tilesTotal, true);
-    const tiles = this.map.layers.passPlatform.getTilesWithin(0, 0, this.map.layers.passPlatform.width, this.map.layers.passPlatform.height , { isColliding: true });
-
-    const { TileBody: MatterTileBody } = Phaser.Physics.Matter;
-
-    const matterTiles = tiles.map(tile => new MatterTileBody(this.matter.world, tile));
-
-    for (let i = 0; i < matterTiles.length; i++) {
-      const tile = matterTiles[i];
-      tile.setSensor(true);
-
-      this.matterCollision.addOnCollideStart({
-        objectA: [tile.body],
-        objectB: [ this.player.sensors.bigBottom ],
-        callback: () => tile.setSensor(false)
-      });
-      this.matterCollision.addOnCollideActive({
-        objectA: [tile.body],
-        objectB: [ this.player.sensors.bigBottom ],
-        callback: () => tile.setSensor(false)
-      });
-      this.matterCollision.addOnCollideEnd({
-        objectA: [tile.body],
-        objectB: [ this.player.sensors.bottom ],
-        callback: () => tile.setSensor(true)
-      });
-    }
+    this.map.platforms.setupPlayerCollision(this.player);
 
     this.matter.world.setBounds(0, 0, this.map.tilemap.widthInPixels, this.map.tilemap.heightInPixels);
     this.cameras.main.setBounds(0, 0, this.map.tilemap.widthInPixels, this.map.tilemap.heightInPixels);

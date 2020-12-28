@@ -1,3 +1,5 @@
+import Platforms from './platforms';
+
 import {
   TILEMAP_KEYS,
   TILESET_KEYS,
@@ -10,6 +12,7 @@ export default class Map {
   scene;
   tilemap;
   layers;
+  platforms;
 
   constructor(scene) {
     this.scene = scene;
@@ -31,5 +34,7 @@ export default class Map {
 
     this.scene.matter.world.convertTilemapLayer(this.layers.slope);
     this.scene.matter.world.convertTilemapLayer(this.layers.snow);
+
+    this.platforms = new Platforms(this.scene, this.layers.passPlatform);
   }
 }
