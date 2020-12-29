@@ -8,17 +8,29 @@ import {
 export default class Portal {
   scene;
   sprite;
-  portalObject;
+  object;
+  properties = {};
 
-  constructor(scene, portalObject) {
+  constructor(scene, object) {
     this.scene = scene;
-
+    this.object = object;
     this.sprite = this.scene.matter.add.sprite(0, 0, IMAGE_KEYS.PORTAL, 0);
     this.sprite
     .setFixedRotation()
     .setStatic(true)
     .setSensor(true)
-    .setPosition(portalObject.x, portalObject.y - this.sprite.height / 2);
+    .setPosition(this.object.x - this.sprite.width / 2, this.object.y - this.sprite.height / 2);
+  
+    this.setupProperties();
+  }
+
+  setupProperties() {
+    if (!this.object.properties) {
+      return;
+    }
+    this.object.properties.forEach(property => {
+      this.properties[property.name] = property.value;
+    })
   }
 
   onPlayerCollision(player, playerCallback) {
@@ -30,8 +42,6 @@ export default class Portal {
       callback: () => {
         if (player.upInput.isDown) {
           playerCallback();
-          // this.player.sprite.setVelocity(0);
-          // this.player.sprite.setPosition(this.player.sprite.x + 400, this.player.sprite.y);
         }
       }
     });

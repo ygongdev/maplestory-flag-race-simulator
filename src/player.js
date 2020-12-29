@@ -1,6 +1,35 @@
 import Phaser from 'phaser';
 import MultiKey from './utils/multi-key';
 
+/**
+ * Mechanics Explanation
+ * 
+ * Walking animation
+ * 1. When the player is on the ground
+ * 2. Can not walk in midair
+ * 3. When not using snowshoe, should experience acceleration up to a certain velocity
+ * 4. When using snowshoe, should not exprience acceleration, only a higher constant velocity
+ * 5. Walking on edge of slope in same direction should gain a velocity boost.
+ * 
+ * Climbing animation
+ * 1. Can only climb up or down when encountering a rope
+ * 2. Ignores gravity 
+ * 3. Can not walk left or right during climbing
+ * 4. Can jump left or right off the rope.
+ * 
+ * Standing animation
+ * 1. When not performing other animations
+ * 
+ * Jumping animation
+ * 1. Can not change velocity while in middle of jump, direction the player faces can be changed
+ * 2. Can only jump once every time player touches the ground or climbing onto another rope
+ * 3. Should gain a velocity boost from jumping off edge of slope in the same direction
+ * 4. If jumping on the opposite direction of slope, velocity gets reduced significantly.
+ * 5. Can receive significant velocity boost from using jump portals.
+ * 
+ * Walls
+ * 1. Velocity is reduced to 0 when unsuccessfully jump over a wall
+ */
 export default class Player {
   scene;
 
