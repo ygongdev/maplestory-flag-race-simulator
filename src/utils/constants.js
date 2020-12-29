@@ -23,6 +23,12 @@ export const IMAGE_KEYS = {
   SLOPE_LEFT: "slopeLeftTiles",
   SLOPE_RIGHT: "slopeRightTiles",
   PORTAL: "portal",
+  BOOSTER: {
+    LEFT: "booster_left",
+    RIGHT: "booster_right",
+    UP: "booster_up",
+    UP_LEFT: "booster_up_left"
+  }
 }
 
 export const SPRITESHEET_KEYS = {

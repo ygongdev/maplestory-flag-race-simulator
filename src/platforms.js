@@ -17,6 +17,11 @@ export default class Platforms {
     this.matterTiles = tiles.map(tile => new MatterTileBody(this.scene.matter.world, tile).setSensor(true));
   }
 
+  /**
+   * 
+   * @param {*} player 
+   * TODO: Need to refactor this, maybe set up a sensor below and above the tile. Below sensor for disabling collision, above tile for enabling collision. Tried, but rendering got so slow.
+   */
   setupPlayerCollision(player) {
     for (let i = 0; i < this.matterTiles.length; i++) {
       const matterTile = this.matterTiles[i];
@@ -33,7 +38,7 @@ export default class Platforms {
       });
       this.scene.matterCollision.addOnCollideEnd({
         objectA: [matterTile.body],
-        objectB: [ player.sensors.bottom ],
+        objectB: [ player.sensors.bigBottom ],
         callback: () => matterTile.setSensor(true)
       });
     }

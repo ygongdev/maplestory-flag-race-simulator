@@ -44,6 +44,9 @@ export default class Player {
 
   canJump = true;
   isClimbing = false;
+  // Bypass velocity limits if we're using boosters.
+  isBoostingX = false;
+  isBoostingY = false;
   isTouching = {
     left: false,
     right: false,
@@ -73,6 +76,7 @@ export default class Player {
   }
 
   update() {
+    // move slower in air please.
     const moveSpeed = this.isTouching.ground ? 0.05 : 0.01;
 
     if (this.isTouching.ground) {
@@ -97,6 +101,7 @@ export default class Player {
         this.sprite.applyForce({ x: -moveSpeed, y: 0});
       }
       if (this.isTouching.ground && this.canJump) {
+        this.isBoostingX = false;
         this.sprite.anims.play('walking', true);
       }
       // console.log(this.sprite.body.velocity.x);
@@ -108,6 +113,7 @@ export default class Player {
       }
 
       if (this.isTouching.ground && this.canJump) {
+        this.isBoostingX = false;
         this.sprite.anims.play('walking', true);
       }
         // console.log(this.sprite.body.velocity.x);
@@ -115,24 +121,27 @@ export default class Player {
       this.sprite.anims.play('standing', true);
     }
 
-    if (this.sprite.body.velocity.x > 5) {
-      this.sprite.setVelocityX(5);
-    } else if (this.sprite.body.velocity.x < -5) {
-      this.sprite.setVelocityX(-5);
+    if (!this.isBoostingX) {
+      if (this.sprite.body.velocity.x > 5) {
+        this.sprite.setVelocityX(5);
+      } else if (this.sprite.body.velocity.x < -5) {
+        this.sprite.setVelocityX(-5);
+      }
     }
   }
 
   _setupPlayerSprite(positionX, positionY) {
     this.sprite = this.scene.matter.add.sprite(0, 0, 'player_standing', 0);
 
-    const { Body, Bodies } = Phaser.Physics.Matter.Matter; // Native Matter modules
+    const { Body, Bodies } = Phaser.Physics.Matter.Matter;
 
     const { width: w, height: h } = this.sprite;
     const mainBody = Bodies.rectangle(w / 2, h / 2, w*0.6, h*0.95, { chamfer: { radius: 10 } });
-    // BigBottom is purely for detecting platforms that are meant to pass through earlier
+    // BigBottom is purely for detecting platforms that are meant to pass through earlier.
+    // TODO: Would like a better solution
     this.sensors = {
       bottom: Bodies.rectangle(w / 2, h, w*.5, 2, { isSensor: true }),
-      bigBottom: Bodies.rectangle(w / 2, h, w*.5, 10, { isSensor: true }),
+      bigBottom: Bodies.rectangle(w / 2, h + 2, w*.5, 50, { isSensor: true }),
       left: Bodies.rectangle(w* 0.18, h / 2, 2, h * 0.5, { isSensor: true }),
       right: Bodies.rectangle(w * 0.82, h /2, 2, h * 0.5, { isSensor: true })
     };
@@ -149,7 +158,7 @@ export default class Player {
     this.sprite
       .setExistingBody(compoundBody)
       .setScale(1.5)
-      .setFixedRotation() // Sets inertia to infinity so the player can't rotate
+      .setFixedRotation()
       .setPosition(positionX, positionY)
   }
 
@@ -210,7 +219,9 @@ export default class Player {
   _onSensorCollide({bodyA, bodyB, pair}) {
     if (bodyB.isSensor) {
       return;
-    } // We only care about collisions with physical objects
+    } 
+    
+    // We only care about collisions with physical objects
     if (bodyA === this.sensors.left) {
       this.isTouching.left = true;
     } else if (bodyA === this.sensors.right) {

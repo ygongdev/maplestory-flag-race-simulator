@@ -33,15 +33,16 @@ export default class Portal {
     })
   }
 
-  onPlayerCollision(player, playerCallback) {
+  addPlayerCollision(player) {
     const playerSensors = Object.keys(player.sensors).map(key => player.sensors[key]);
 
     this.scene.matterCollision.addOnCollideActive({
-      objectA: [ this.sprite],
+      objectA: [ this.sprite ],
       objectB: playerSensors,
       callback: () => {
         if (player.upInput.isDown) {
-          playerCallback();
+          player.sprite.setVelocity(0);
+          player.sprite.setPosition(this.sprite.x + this.properties.moveX, this.sprite.y + this.properties.moveY);
         }
       }
     });
