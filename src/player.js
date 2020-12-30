@@ -151,7 +151,7 @@ export default class Player {
     // TODO: Would like a better solution
     this.sensors = {
       bottom: Bodies.rectangle(w / 2, h, w*.5, 2, { isSensor: true }),
-      bigBottom: Bodies.rectangle(w / 2, h + 2, w*.5, 50, { isSensor: true }),
+      bigBottom: Bodies.rectangle(w / 2, h + 25, w*.5, 50, { isSensor: true }),
       left: Bodies.rectangle(w* 0.18, h / 2, 2, h * 0.5, { isSensor: true }),
       right: Bodies.rectangle(w * 0.82, h /2, 2, h * 0.5, { isSensor: true })
     };
