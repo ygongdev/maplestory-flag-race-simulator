@@ -1,8 +1,8 @@
 'use strict';
 
-import SnowTileset from './assets/tileset/flag_texture_75_86.png';
-import SlopeLeftTileset from './assets/tileset/slope_texture_75_86.png';
-import SlopeRightTileset from './assets/tileset/slope_texture_75_86_right.png';
+import SnowTileset from './assets/tileset/flag_texture_75_86_extruded.png';
+import SlopeLeftTileset from './assets/tileset/slope_texture_75_86_extruded.png';
+import SlopeRightTileset from './assets/tileset/slope_texture_75_86_right_extruded.png';
 import PortalImage from './assets/images/portal.png';
 import BoosterLeftImage from './assets/images/booster_left.png';
 import BoosterUpLeftImage from './assets/images/booster_up_left.png';
@@ -68,28 +68,32 @@ export default class MaplestoryFlagRaceSimulator extends Phaser.Scene {
     const spawnPoint = this.map.tilemap.findObject("Player", obj => obj.name === "Spawn point");
     
     this.player = new Player(this, spawnPoint.x, spawnPoint.y);
-    // this.player = new Player(this, 6000, 3300);
+    // this.player = new Player(this, 5200, 1200);
 
     this.player.sprite.depth = 500;
 
     this.map.platforms.setupPlayerCollision(this.player);
 
-    this._createPortals();
-    this._createPits();
-    this._createBoosters();
-
-    // Mini map
-    const zoom = 400 / this.map.tilemap.widthInPixels;
-
-    this.minimap = this.cameras.add(10, 10, 400, zoom*this.map.tilemap.heightInPixels).setZoom(zoom).setName('mini');
-    this.minimap.setBackgroundColor(0x002244);
-    this.minimap.scrollX = this.map.tilemap.widthInPixels * 0.47;
-    this.minimap.scrollY = this.map.tilemap.heightInPixels / 2;
+    this.minimap = this._createMinimap();
+    this.portals = this._createPortals();
+    this.pits = this._createPits();
+    this.boosters = this._createBoosters();
 
     this.matter.world.setBounds(0, 0, this.map.tilemap.widthInPixels, this.map.tilemap.heightInPixels);
     this.cameras.main.setBounds(0, 0, this.map.tilemap.widthInPixels, this.map.tilemap.heightInPixels).setName('main');
 
     this.cameras.main.startFollow(this.player.sprite);
+  }
+
+  _createMinimap() {
+    const zoom = 400 / this.map.tilemap.widthInPixels;
+
+    const minimap = this.cameras.add(5, 5, 400, zoom*this.map.tilemap.heightInPixels).setZoom(zoom).setName('mini');
+    minimap.setBackgroundColor(0x002244);
+    minimap.scrollX = this.map.tilemap.widthInPixels * 0.48;
+    minimap.scrollY = this.map.tilemap.heightInPixels * 0.48;
+
+    return minimap;
   }
 
   _createPortals() {
@@ -98,6 +102,8 @@ export default class MaplestoryFlagRaceSimulator extends Phaser.Scene {
     portals.forEach(portal => {
       portal.addPlayerCollision(this.player);
     });
+
+    return portals;
   }
 
   _createPits() {
@@ -106,6 +112,8 @@ export default class MaplestoryFlagRaceSimulator extends Phaser.Scene {
     pits.forEach(pit => {
       pit.addPlayerCollision(this.player);
     });
+
+    return pits;
   }
 
   _createBoosters() {
@@ -113,7 +121,9 @@ export default class MaplestoryFlagRaceSimulator extends Phaser.Scene {
 
     boosters.forEach(booster => {
       booster.addPlayerCollision(this.player);
-    })
+    });
+
+    return boosters;
   }
 }
 

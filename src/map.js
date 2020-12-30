@@ -19,9 +19,9 @@ export default class Map {
 
     this.tilemap = this.scene.add.tilemap(TILEMAP_KEYS.FLAG_RACE);
 
-    const snowTileset = this.tilemap.addTilesetImage(TILESET_KEYS.SNOW, IMAGE_KEYS.SNOW, 75, 86, 0, 0);
-    const slopeLeftTileset = this.tilemap.addTilesetImage(TILESET_KEYS.SLOPE_LEFT, IMAGE_KEYS.SLOPE_LEFT, 75, 86, 0, 0);
-    const slopeRightTileset = this.tilemap.addTilesetImage(TILESET_KEYS.SLOPE_RIGHT, IMAGE_KEYS.SLOPE_RIGHT, 75, 86, 0, 0);
+    const snowTileset = this.tilemap.addTilesetImage(TILESET_KEYS.SNOW, IMAGE_KEYS.SNOW, 77, 88, 0, 0);
+    const slopeLeftTileset = this.tilemap.addTilesetImage(TILESET_KEYS.SLOPE_LEFT, IMAGE_KEYS.SLOPE_LEFT, 77, 88, 0, 0);
+    const slopeRightTileset = this.tilemap.addTilesetImage(TILESET_KEYS.SLOPE_RIGHT, IMAGE_KEYS.SLOPE_RIGHT, 77, 88, 0, 0);
 
     this.layers = {
       slope: this.tilemap.createLayer('SlopeLayer', [slopeLeftTileset, slopeRightTileset], 0, 0),

@@ -1,5 +1,9 @@
 import Phaser from 'phaser';
 import MultiKey from './utils/multi-key';
+import {
+  MAX_WALK_VELOCITY_X,
+  JUMP_VELOCITY_Y
+} from './utils/constants';
 
 /**
  * Mechanics Explanation
@@ -90,7 +94,7 @@ export default class Player {
         delay: 250,
         callback: () => (this.canJump = true)
       });
-      this.sprite.setVelocityY(-12);
+      this.sprite.setVelocityY(JUMP_VELOCITY_Y);
       this.canJump = false;
       this.sprite.anims.play('jumping', true);
     } 
@@ -122,12 +126,18 @@ export default class Player {
     }
 
     if (!this.isBoostingX) {
-      if (this.sprite.body.velocity.x > 5) {
-        this.sprite.setVelocityX(5);
-      } else if (this.sprite.body.velocity.x < -5) {
-        this.sprite.setVelocityX(-5);
+      if (this.sprite.body.velocity.x > MAX_WALK_VELOCITY_X) {
+        this.sprite.setVelocityX(MAX_WALK_VELOCITY_X);
+      } else if (this.sprite.body.velocity.x < -MAX_WALK_VELOCITY_X) {
+        this.sprite.setVelocityX(-MAX_WALK_VELOCITY_X);
       }
     }
+
+    // if (!this.isBoostingY) {
+    //   if (this.sprite.body.velocity.y < JUMP_VELOCITY_Y) {
+    //     this.sprite.setVelocityY(JUMP_VELOCITY_Y);
+    //   }
+    // }
   }
 
   _setupPlayerSprite(positionX, positionY) {

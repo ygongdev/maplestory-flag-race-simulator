@@ -8,7 +8,7 @@ export default class Pit {
     this.scene = scene;
     this.object = object;
 
-    this.sensor = this.scene.matter.add.rectangle(this.object.x, this.object.y, 2, 2, { isStatic: true });
+    this.sensor = this.scene.matter.add.rectangle(this.object.x, this.object.y, 5, 5, { isStatic: true, isSensor: true });
     this.setupProperties();
   }
 

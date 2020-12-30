@@ -42,7 +42,7 @@ export default class Portal {
       callback: () => {
         if (player.upInput.isDown) {
           player.sprite.setVelocity(0);
-          player.sprite.setPosition(this.sprite.x + this.properties.moveX, this.sprite.y + this.properties.moveY);
+          player.sprite.setPosition(this.properties.moveToX === 0 ? player.sprite.x : this.properties.moveToX, this.properties.moveToY === 0 ? player.sprite.y : this.properties.moveToY);
         }
       }
     });
