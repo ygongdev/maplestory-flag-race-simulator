@@ -8,6 +8,7 @@ import BoosterLeftImage from './assets/images/booster_left.png';
 import BoosterUpLeftImage from './assets/images/booster_up_left.png';
 import BoosterRightImage from './assets/images/booster_right.png';
 import BoosterUpImage from './assets/images/booster_up.png';
+import RopeImage from './assets/images/straighten_rope.png';
 import PlayerWalkingSpriteSheet from './assets/spritesheet/walking.png';
 import PlayerClimbingSpriteSheet from './assets/spritesheet/climbing.png';
 import PlayerJumpingSpriteSheet from './assets/spritesheet/jumping.png';
@@ -21,12 +22,15 @@ import Map from './map';
 import Portal from './portal';
 import Pit from './pit';
 import Booster from './booster';
+import Rope from './rope';
 
 import {
   TILEMAP_KEYS,
   IMAGE_KEYS,
   SPRITESHEET_KEYS,
-  SOUND_KEYS
+  SOUND_KEYS,
+  PLAYER_COLLISION_GROUP,
+  NONE_COLLISION_GROUP,
 } from './utils/constants';
 
 
@@ -52,6 +56,7 @@ export default class MaplestoryFlagRaceSimulator extends Phaser.Scene {
     this.load.image(IMAGE_KEYS.BOOSTER.RIGHT, BoosterRightImage);
     this.load.image(IMAGE_KEYS.BOOSTER.UP_LEFT, BoosterUpLeftImage);
     this.load.image(IMAGE_KEYS.BOOSTER.UP, BoosterUpImage);
+    this.load.image(IMAGE_KEYS.ROPE, RopeImage);
     this.load.spritesheet(SPRITESHEET_KEYS.PLAYER.STANDING, PlayerStandingSpriteSheet, { frameWidth: 75.5, frameHeight: 86, });
     this.load.spritesheet(SPRITESHEET_KEYS.PLAYER.WALKING, PlayerWalkingSpriteSheet, { frameWidth: 75.5, frameHeight: 86 });
     this.load.spritesheet(SPRITESHEET_KEYS.PLAYER.JUMPING, PlayerJumpingSpriteSheet, { frameWidth: 76, frameHeight: 82 });
@@ -68,21 +73,32 @@ export default class MaplestoryFlagRaceSimulator extends Phaser.Scene {
     const spawnPoint = this.map.tilemap.findObject("Player", obj => obj.name === "Spawn point");
     
     this.player = new Player(this, spawnPoint.x, spawnPoint.y);
-    // this.player = new Player(this, 5200, 1200);
-
+    // this.player = new Player(this, 6500, 1500);
+    this.player.sprite.setCollisionGroup(PLAYER_COLLISION_GROUP);
+    this.player.sprite.setCollidesWith(PLAYER_COLLISION_GROUP);
     this.player.sprite.depth = 500;
 
-    this.map.platforms.setupPlayerCollision(this.player);
+    this.map.platforms.setupCollideWith(NONE_COLLISION_GROUP);
 
     this.minimap = this._createMinimap();
     this.portals = this._createPortals();
     this.pits = this._createPits();
     this.boosters = this._createBoosters();
+    this.ropes = this._createRopes();
 
     this.matter.world.setBounds(0, 0, this.map.tilemap.widthInPixels, this.map.tilemap.heightInPixels);
     this.cameras.main.setBounds(0, 0, this.map.tilemap.widthInPixels, this.map.tilemap.heightInPixels).setName('main');
 
     this.cameras.main.startFollow(this.player.sprite);
+  }
+
+  update() {
+    // Set player and the pass through platforms to not collide if the player is jumping, e.g velocity y is negative, and the mask is not set to NONE
+    if (this.map.platforms.maskGroup !== NONE_COLLISION_GROUP && this.player.sprite.body.velocity.y < 0) {
+      this.map.platforms.setupCollideWith(NONE_COLLISION_GROUP);
+    } else if (this.map.platforms.maskGroup === NONE_COLLISION_GROUP && this.player.sprite.body.velocity.y >= 0) {
+      this.map.platforms.setupCollideWith(PLAYER_COLLISION_GROUP);
+    }
   }
 
   _createMinimap() {
@@ -124,6 +140,16 @@ export default class MaplestoryFlagRaceSimulator extends Phaser.Scene {
     });
 
     return boosters;
+  }
+
+  _createRopes() {
+    const ropes = this.map.tilemap.getObjectLayer("Rope").objects.map(rope => new Rope(this, rope));
+
+    ropes.forEach(rope => {
+      rope.addPlayerCollision(this.player);
+    });
+
+    return ropes;
   }
 }
 

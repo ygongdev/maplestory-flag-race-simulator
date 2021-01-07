@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="115" height="50" tilewidth="75" tileheight="86" infinite="0" nextlayerid="11" nextobjectid="26">
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="115" height="50" tilewidth="75" tileheight="86" infinite="0" nextlayerid="12" nextobjectid="33">
  <editorsettings>
   <export target="map.json" format="json"/>
  </editorsettings>
@@ -188,6 +188,23 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="11" name="Rope">
+  <object id="26" name="rope1" x="7883.82" y="1633.15">
+   <point/>
+  </object>
+  <object id="27" name="rope2" x="7969.76" y="1631.15">
+   <point/>
+  </object>
+  <object id="28" name="rope3" x="8061.64" y="1632.12">
+   <point/>
+  </object>
+  <object id="29" name="rope4" x="8146.55" y="1633.09">
+   <point/>
+  </object>
+  <object id="30" name="rope5" x="8234.48" y="1633.09">
+   <point/>
+  </object>
+ </objectgroup>
  <objectgroup id="8" name="Portal">
   <object id="11" name="portal1" x="1160.67" y="3866.67">
    <properties>
@@ -199,7 +216,7 @@
   <object id="12" name="portal2" x="8512.67" y="4211">
    <properties>
     <property name="moveToX" type="int" value="6800"/>
-    <property name="moveToY" type="int" value="3100"/>
+    <property name="moveToY" type="int" value="3080"/>
    </properties>
    <point/>
   </object>
@@ -230,7 +247,7 @@
    <properties>
     <property name="direction" value="UP"/>
     <property name="jumpX" type="int" value="-1"/>
-    <property name="jumpY" type="int" value="-20"/>
+    <property name="jumpY" type="int" value="-40"/>
    </properties>
    <point/>
   </object>
@@ -238,7 +255,7 @@
    <properties>
     <property name="direction" value="UP"/>
     <property name="jumpX" type="int" value="1"/>
-    <property name="jumpY" type="int" value="-20"/>
+    <property name="jumpY" type="int" value="-30"/>
    </properties>
    <point/>
   </object>
@@ -261,7 +278,7 @@
   <object id="20" name="booster1" x="6896.97" y="3093.09">
    <properties>
     <property name="direction" value="RIGHT"/>
-    <property name="jumpX" type="int" value="5"/>
+    <property name="jumpX" type="int" value="20"/>
     <property name="jumpY" type="int" value="-2"/>
    </properties>
    <point/>
@@ -269,7 +286,7 @@
   <object id="21" name="booster2" x="7250.67" y="3356">
    <properties>
     <property name="direction" value="RIGHT"/>
-    <property name="jumpX" type="int" value="5"/>
+    <property name="jumpX" type="int" value="10"/>
     <property name="jumpY" type="int" value="-1"/>
    </properties>
    <point/>

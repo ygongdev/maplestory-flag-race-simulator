@@ -1,9 +1,13 @@
 import Phaser from 'phaser';
+import {
+  PASS_THROUGH_PLATFORMS_COLLISION_GROUP,
+} from './utils/constants';
 
 export default class Platforms {
   scene;
   layer;
   matterTiles;
+  maskGroup;
 
   constructor(scene, layer) {
     this.scene = scene;
@@ -14,33 +18,14 @@ export default class Platforms {
 
     const { TileBody: MatterTileBody } = Phaser.Physics.Matter;
 
-    this.matterTiles = tiles.map(tile => new MatterTileBody(this.scene.matter.world, tile).setSensor(true));
+    this.matterTiles = tiles.map(tile => new MatterTileBody(this.scene.matter.world, tile).setCollisionGroup(PASS_THROUGH_PLATFORMS_COLLISION_GROUP));
   }
 
-  /**
-   * 
-   * @param {*} player 
-   * TODO: Need to refactor this, maybe set up a sensor below and above the tile. Below sensor for disabling collision, above tile for enabling collision. Tried, but rendering got so slow.
-   */
-  setupPlayerCollision(player) {
+  setupCollideWith(group) {
+    this.maskGroup = group;
     for (let i = 0; i < this.matterTiles.length; i++) {
       const matterTile = this.matterTiles[i];
-  
-      this.scene.matterCollision.addOnCollideStart({
-        objectA: [matterTile.body],
-        objectB: [ player.sensors.bigBottom ],
-        callback: () => matterTile.setSensor(false)
-      });
-      this.scene.matterCollision.addOnCollideActive({
-        objectA: [matterTile.body],
-        objectB: [ player.sensors.bigBottom ],
-        callback: () => matterTile.setSensor(false)
-      });
-      this.scene.matterCollision.addOnCollideEnd({
-        objectA: [matterTile.body],
-        objectB: [ player.sensors.bigBottom ],
-        callback: () => matterTile.setSensor(true)
-      });
+      matterTile.setCollidesWith(group);
     }
   }
 }

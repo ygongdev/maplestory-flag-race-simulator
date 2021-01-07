@@ -2,7 +2,8 @@ import Phaser from 'phaser';
 import MultiKey from './utils/multi-key';
 import {
   MAX_WALK_VELOCITY_X,
-  JUMP_VELOCITY_Y
+  JUMP_VELOCITY_Y,
+  CLIMBING_VELOCITY_Y,
 } from './utils/constants';
 
 /**
@@ -83,23 +84,29 @@ export default class Player {
     // move slower in air please.
     const moveSpeed = this.isTouching.ground ? 0.05 : 0.01;
 
-    if (this.isTouching.ground) {
+    if (this.isClimbing || this.isTouching.ground) {
       this.sprite.setIgnoreGravity(true);
     } else {
       this.sprite.setIgnoreGravity(false);
     }
 
-    if (this.jumpInput.isDown && this.canJump && this.isTouching.ground) {
+    if (this.jumpInput.isDown && this.canJump && (this.isTouching.ground || this.isClimbing)) {
+      console.log('hi');
       this.scene.time.addEvent({
         delay: 250,
         callback: () => (this.canJump = true)
       });
-      this.sprite.setVelocityY(JUMP_VELOCITY_Y);
+      if (this.isClimbing) {
+        this.sprite.setVelocity(CLIMBING_VELOCITY_Y);
+      } else {
+        this.sprite.setVelocityY(JUMP_VELOCITY_Y);
+      }
       this.canJump = false;
       this.sprite.anims.play('jumping', true);
+      this.isClimbing = false;
     } 
 
-    if (this.leftInput.isDown && !this.isTouching.left) {
+    if (this.leftInput.isDown && !this.isTouching.left && !this.isClimbing) {
       this.sprite.setFlipX(false);
       if (!this.isTouchingLeft) {
         this.sprite.applyForce({ x: -moveSpeed, y: 0});
@@ -108,8 +115,7 @@ export default class Player {
         this.isBoostingX = false;
         this.sprite.anims.play('walking', true);
       }
-      // console.log(this.sprite.body.velocity.x);
-    } else if (this.rightInput.isDown && !this.isTouching.right) {
+    } else if (this.rightInput.isDown && !this.isTouching.right && !this.isClimbing) {
       this.sprite.setFlipX(true);
 
       if (!this.isTouching.right) {
@@ -120,8 +126,18 @@ export default class Player {
         this.isBoostingX = false;
         this.sprite.anims.play('walking', true);
       }
-        // console.log(this.sprite.body.velocity.x);
-    } else if (this.isTouching.ground && this.canJump) {
+    } else if (this.isClimbing) {
+      this.sprite.play('climbing', true);
+      this.sprite.setVelocityX(0);
+
+      if (this.upInput.isDown) {
+        this.sprite.setVelocityY(CLIMBING_VELOCITY_Y);
+      } else if (this.downInput.isDown) {
+        this.sprite.setVelocityY(-CLIMBING_VELOCITY_Y);
+      } else {
+        this.sprite.setVelocityY(0);
+      }
+    }else if (this.isTouching.ground && this.canJump) {
       this.sprite.anims.play('standing', true);
     }
 
@@ -147,17 +163,14 @@ export default class Player {
 
     const { width: w, height: h } = this.sprite;
     const mainBody = Bodies.rectangle(w / 2, h / 2, w*0.6, h*0.95, { chamfer: { radius: 10 } });
-    // BigBottom is purely for detecting platforms that are meant to pass through earlier.
-    // TODO: Would like a better solution
     this.sensors = {
       bottom: Bodies.rectangle(w / 2, h, w*.5, 2, { isSensor: true }),
-      bigBottom: Bodies.rectangle(w / 2, h + 25, w*.5, 50, { isSensor: true }),
       left: Bodies.rectangle(w* 0.18, h / 2, 2, h * 0.5, { isSensor: true }),
       right: Bodies.rectangle(w * 0.82, h /2, 2, h * 0.5, { isSensor: true })
     };
 
     const compoundBody = Body.create({
-      parts: [mainBody, this.sensors.bottom, this.sensors.left, this.sensors.right, this.sensors.bigBottom],
+      parts: [mainBody, this.sensors.bottom, this.sensors.left, this.sensors.right],
       frictionStatic: 0,
       frictionAir: 0.01,
       friction: 0.005,

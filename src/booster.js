@@ -9,6 +9,7 @@ export default class Booster {
   scene;
   sprite;
   object;
+  direction;
   properties = {};
   canDetect = true;
 
@@ -17,17 +18,16 @@ export default class Booster {
     this.object = object;
 
     this.setupProperties();
+    this.direction = this.properties.direction;
 
     let spriteImage;
-    let useWidthSensor = true;
+
     switch(this.properties.direction) {
       case "LEFT":
         spriteImage = IMAGE_KEYS.BOOSTER.LEFT;
-        useWidthSensor = false;
         break;
       case "RIGHT":
         spriteImage = IMAGE_KEYS.BOOSTER.RIGHT;
-        useWidthSensor = false;
         break;
       case "UP":
         spriteImage = IMAGE_KEYS.BOOSTER.UP;
@@ -43,22 +43,42 @@ export default class Booster {
 
     const { Body, Bodies } = Phaser.Physics.Matter.Matter;
 
-    this.sensor = Bodies.rectangle(
-      this.sprite.width / 2,
-      this.sprite.height / 2,
-      useWidthSensor ? this.sprite.width : 2,
-      useWidthSensor ? 2 : this.sprite.height,
-      { isSensor: true }
-    );
+    this.sensors = {
+      vertical: Bodies.rectangle(this.sprite.width / 2, this.sprite.height / 2, 2, this.sprite.height / 2, { isSensor: true }),
+      horizontal: Bodies.rectangle(this.sprite.width / 2, this.sprite.height, this.sprite.width / 2, 2, { isSensor: true }),
+    }
 
-    this.sprite
+    // this.mainSensor = Bodies.rectangle(
+    //   this.sprite.width / 2,
+    //   this.sprite.height / 2,
+    //   this.sprite.width / 2,
+    //   this.sprite.height / 2,
+    //   { isSensor: true }
+    // );
+
+    this.sprite 
     .setExistingBody(Body.create({
-      parts: [this.sensor]
+      parts: [ this.sensors.horizontal, this.sensors.vertical ]
     }))
     .setFixedRotation()
     .setScale(3)
     .setStatic(true)
-    .setPosition(this.object.x - this.sprite.width * 0.75, this.object.y - this.sprite.height * 1.5);
+    .setPosition(this.object.x - this.sprite.displayWidth / 4, this.object.y - this.sprite.displayHeight / 4)
+
+    
+    // this.sensor = Bodies.rectangle(
+    //   this.sprite.width / 2,
+    //   this.sprite.height / 2,
+    //   useWidthSensor ? this.sprite.width : 2,
+    //   useWidthSensor ? 2 : this.sprite.height,
+    //   { isSensor: true }
+    // );
+    
+    // this.sprite
+    // .setExistingBody(Body.create({
+    //   parts: [this.sensor]
+    // }))
+    // .setPosition(this.object.x - this.sprite.width * 0.75, this.object.y - this.sprite.height * 1.5);
   }
 
   setupProperties() {
@@ -73,9 +93,36 @@ export default class Booster {
   addPlayerCollision(player) {
     // const playerSensors = Object.keys(player.sensors).map(key => player.sensors[key]);
 
+    let boosterSensor;
+    let playerSensor;
+
+    switch (this.direction) {
+      case "LEFT":
+        playerSensor = player.sensors.right;
+        boosterSensor = this.sensors.vertical;
+        break;
+      case "RIGHT":
+        playerSensor = player.sensors.left;
+        boosterSensor = this.sensors.vertical;
+        break;
+      case "UP":
+      default:
+        playerSensor = player.sensors.bottom;
+        boosterSensor = this.sensors.horizontal;
+        break;
+    }
+    this.scene.matterCollision.addOnCollideActive({
+      objectA: [ boosterSensor ],
+      objectB: [ playerSensor ],
+      callback: () => {
+        player.isBoostingX = true;
+        player.sprite.setVelocity(player.sprite.body.velocity.x + this.properties.jumpX, player.sprite.body.velocity.y + this.properties.jumpY);
+      }
+    });
+
     this.scene.matterCollision.addOnCollideStart({
-      objectA: [ this.sensor ],
-      objectB: [ player.sensors.bottom, player.sensors.left, player.sensors.bottom ],
+      objectA: [ boosterSensor ],
+      objectB: [ playerSensor ],
       callback: () => {
         player.isBoostingX = true;
         player.sprite.setVelocity(player.sprite.body.velocity.x + this.properties.jumpX, player.sprite.body.velocity.y + this.properties.jumpY);
